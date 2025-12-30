@@ -10,14 +10,11 @@ public class GestionUsuarios {
     public Usuario login(String user, String pass) {
         Usuario usuarioEncontrado = null;
         
-        // Consulta que une USUARIOS, EMPLEADOS y ROLES
-        String sql = "SELECT u.id_Usuario, u.usu_NombreUsuario, " +
-                     "e.emp_Nombre1 + ' ' + e.emp_Apellido1 AS NombreCompleto, " +
-                     "r.id_Rol " +
-                     "FROM USUARIOS u " +
-                     "INNER JOIN Empleados e ON u.id_Empleado = e.id_Empleado " +
-                     "INNER JOIN Roles r ON e.id_Rol = r.id_Rol " +
-                     "WHERE u.usu_NombreUsuario = ? AND u.usu_Clave = ? AND u.ESTADO_USU = 'ACT'";
+        // --- CONSULTA ACTUALIZADA AL NUEVO SCRIPT ---
+        // Ya no necesitamos JOINS porque el nombre real y el rol están en la tabla USUARIOS
+        String sql = "SELECT id_Usuario_PK, nombre_usuario, usu_NombreReal, id_RolSistema " +
+                     "FROM USUARIOS " +
+                     "WHERE nombre_usuario = ? AND clave = ? AND usu_Estado = 'ACT'";
 
         try (Connection con = PruebaJDBC.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -29,11 +26,12 @@ public class GestionUsuarios {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     // Si entra aquí, ¡Credenciales Correctas!
+                    // Creamos el objeto con los nombres de columnas exactos de tu nueva BD
                     usuarioEncontrado = new Usuario(
-                        rs.getInt("id_Usuario"),
-                        rs.getString("usu_NombreUsuario"),
-                        rs.getString("NombreCompleto"),
-                        rs.getString("id_Rol") // Aquí capturamos el rol (ej: ROL-ANA)
+                        rs.getInt("id_Usuario_PK"),      // Antes id_Usuario
+                        rs.getString("nombre_usuario"),  // Antes usu_NombreUsuario
+                        rs.getString("usu_NombreReal"),  // Antes venía de Empleados (NombreCompleto)
+                        rs.getString("id_RolSistema")    // Antes id_Rol
                     );
                 }
             }

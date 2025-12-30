@@ -26,3 +26,5 @@ replay_pid*
 #Permitir los jar de las librerias 
 !/libs/*.jar
 /nbproject/private/
+/build/
+/dist/
